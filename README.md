@@ -1,6 +1,8 @@
 # LearnRestify
 
 npm install restify
+npm install typescript
+npm install ts-node
 
 npm start
 

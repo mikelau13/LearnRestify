@@ -1,4 +1,6 @@
-var restify = require('restify');
+import restify from 'restify';
+//var restify = require('restify');
+import sendV1, { sendV2, sendV3 } from './routes/versioningRoute';
 
 function respond(req, res, next) {
   res.send('hello ' + req.params.name);
@@ -13,7 +15,6 @@ server.use(function(req, res, next) {
     console.warn('run for all routes!');
     return next();
 });
-
 
 server.get('/hello/:name', respond);
 server.get('/', function(req, res, next) {
@@ -63,16 +64,6 @@ server.get('/anotherroute',
 );
 
 //versioning
-function sendV1(req, res, next) {
-    res.send('hello: ' + req.params.name);
-    return next();
-}
-  
-function sendV2(req, res, next) {
-    res.send({ hello: req.params.name });
-    return next();
-}
-
 server.get('/versioning/:name', restify.plugins.conditionalHandler([
     { version: ['1.0.0', '1.1.3', '1.1.8'], handler: sendV1 },
     { version: ['2.0.0', '2.1.0', '2.2.0'],
