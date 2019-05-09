@@ -1,5 +1,6 @@
 import restify from 'restify';
 import sendV1, { sendV2, sendV3 } from './routes/versioningRoute';
+import SearchCachedData from './api/memorycache.api';
 
 function respond(req, res, next) {
   res.send('hello ' + req.params.name);
@@ -99,6 +100,14 @@ server.get('/versioning/:name', restify.plugins.conditionalHandler([
     return callback();
   });
   
+
+// memory-cache
+server.get('/cache/:id', 
+  function (req, res, next) {
+    res.send('find - ' + SearchCachedData(req.params.id));
+    return next();
+  }
+);
 
 server.listen(8080, function() {
   console.log('%s listening at %s', server.name, server.url);
