@@ -74,8 +74,17 @@ function sendV2(req, res, next) {
 }
 
 server.get('/versioning/:name', restify.plugins.conditionalHandler([
-    { version: '1.1.3', handler: sendV1 },
-    { version: '2.0.0', handler: sendV2 }
+    { version: ['1.0.0', '1.1.3', '1.1.8'], handler: sendV1 },
+    { version: ['2.0.0', '2.1.0', '2.2.0'],
+        handler: function (req, res, next) {
+        res.send(200, {
+            requestedVersion: req.version(),
+            matchedVersion: req.matchedVersion()
+        });
+        return next();
+        }
+    },
+    { version: '3.0.0', handler: sendV2 }
   ]));
 
 server.listen(8080, function() {

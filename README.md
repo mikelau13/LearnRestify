@@ -15,4 +15,5 @@ http://localhost:8080/anotherroute
 Versioning
 curl -s localhost:8080/versioning/mike
 curl -s -H 'accept-version: ~1' localhost:8080/versioning/mike
-curl -s -H 'accept-version: ~3' localhost:8080/versioning/mike
+curl -s -H 'accept-version: ~2' localhost:8080/versioning/mike
+curl -s -H 'accept-version: ~4' localhost:8080/versioning/mike
