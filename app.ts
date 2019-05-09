@@ -1,5 +1,4 @@
 import restify from 'restify';
-//var restify = require('restify');
 import sendV1, { sendV2, sendV3 } from './routes/versioningRoute';
 
 function respond(req, res, next) {
@@ -16,11 +15,20 @@ server.use(function(req, res, next) {
     return next();
 });
 
-server.get('/hello/:name', respond);
+server.get('/heartbeat', (req, res) => {
+  res.setHeader(
+    'cache-control',
+    'no-cache, no-store, max-age=0, must-revalidate'
+  );
+  res.send('success');
+});
+
 server.get('/', function(req, res, next) {
     res.send('home')
     return next();
   });
+
+server.get('/hello/:name', respond);
 server.head('/hello/:name', respond);
 server.del('/hello/:name', function rm(req, res, next) {
     res.send(204);
