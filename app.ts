@@ -78,6 +78,20 @@ server.get('/versioning/:name', restify.plugins.conditionalHandler([
     { version: '3.0.0', handler: sendV2 }
   ]));
 
+  // Error handling events
+  server.on('InternalServer', function(req, res, err, callback) {
+    // this will get fired first, as it's the most relevant listener
+    console.log(err.message);
+    return callback();
+  });
+  
+  server.on('restifyError', function(req, res, err, callback) {
+    // this is fired second.
+    console.log(err.message);
+    return callback();
+  });
+  
+
 server.listen(8080, function() {
   console.log('%s listening at %s', server.name, server.url);
 });
