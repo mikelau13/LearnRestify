@@ -1,3 +1,5 @@
 # LearnRestify
 
-npm install restify -save--dev
+npm install restify
+
+npm start
