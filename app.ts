@@ -9,12 +9,21 @@ function respond(req, res, next) {
 
 var server = restify.createServer();
 
-server.pre(restify.plugins.pre.dedupeSlashes());
+// plugins doc: http://restify.com/docs/plugins-api/#serverpre-plugins
+server.pre(restify.plugins.pre.context()); //  creates req.set(key, val) and req.get(key) methods
+server.pre(restify.plugins.pre.sanitizePath()); // Cleans up sloppy URLs on the request object, like /foo////bar/// to /foo/bar.
+server.use(restify.plugins.acceptParser(server.acceptable)); // by default, server.acceptable = [ 'application/json',  'text/plain',  'application/octet-stream',  'application/javascript' ]
+server.use(restify.plugins.authorizationParser()); // Parses out the Authorization header 
+server.use(restify.plugins.dateParser());
+server.use(restify.plugins.queryParser({ mapParams: false }));
+server.use(restify.plugins.urlEncodedBodyParser());
 
-server.use(function(req, res, next) {
-    console.warn('run for all routes!');
-    return next();
-});
+// better example here - https://stackoverflow.com/questions/27440370/how-to-use-restifys-requestlogger
+server.use(restify.plugins.requestLogger({
+  properties: {
+      foo: 'bar'
+  }
+}));
 
 server.get('/heartbeat', (req, res) => {
   res.setHeader(
@@ -74,32 +83,31 @@ server.get('/anotherroute',
 
 //versioning
 server.get('/versioning/:name', restify.plugins.conditionalHandler([
-    { version: ['1.0.0', '1.1.3', '1.1.8'], handler: sendV1 },
-    { version: ['2.0.0', '2.1.0', '2.2.0'],
-        handler: function (req, res, next) {
-        res.send(200, {
-            requestedVersion: req.version(),
-            matchedVersion: req.matchedVersion()
-        });
-        return next();
-        }
-    },
-    { version: '3.0.0', handler: sendV2 }
-  ]));
+  { version: ['1.0.0', '1.1.3', '1.1.8'], handler: sendV1 },
+  { version: ['2.0.0', '2.1.0', '2.2.0'],
+      handler: function (req, res, next) {
+      res.send(200, {
+          requestedVersion: req.version(),
+          matchedVersion: req.matchedVersion()
+      });
+      return next();
+      }
+  },
+  { version: '3.0.0', handler: sendV2 }
+]));
 
-  // Error handling events
-  server.on('InternalServer', function(req, res, err, callback) {
-    // this will get fired first, as it's the most relevant listener
-    console.log(err.message);
-    return callback();
-  });
+// Error handling events
+server.on('InternalServer', function(req, res, err, callback) {
+  // this will get fired first, as it's the most relevant listener
+  console.log(err.message);
+  return callback();
+});
   
-  server.on('restifyError', function(req, res, err, callback) {
-    // this is fired second.
-    console.log(err.message);
-    return callback();
-  });
-  
+server.on('restifyError', function(req, res, err, callback) {
+  // this is fired second.
+  console.log(err.message);
+  return callback();
+});
 
 // memory-cache
 server.get('/cache/:id', 
