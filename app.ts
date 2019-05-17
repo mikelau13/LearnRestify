@@ -1,6 +1,9 @@
-import restify from 'restify';
+import 'dotenv/config';
+import restify, { plugins, Request, Response, Next } from 'restify';
 import sendV1, { sendV2, sendV3 } from './routes/versioningRoute';
 import SearchCachedData from './api/memorycache.api';
+import routesByMethod from './api/src/routes';
+import DummyDataService from './api/src/services/dummyDataService';
 
 function respond(req, res, next) {
   res.send('hello ' + req.params.name);
@@ -8,6 +11,8 @@ function respond(req, res, next) {
 }
 
 var server = restify.createServer();
+DummyDataService.init();
+const port = parseInt(process.env.PORT, 10) || 3000;
 
 // plugins doc: http://restify.com/docs/plugins-api/#serverpre-plugins
 server.pre(restify.plugins.pre.context()); //  creates req.set(key, val) and req.get(key) methods
@@ -24,6 +29,7 @@ server.use(restify.plugins.requestLogger({
       foo: 'bar'
   }
 }));
+
 
 server.get('/heartbeat', (req, res) => {
   res.setHeader(
@@ -62,23 +68,9 @@ server.get('/foo:a',
 //   return next();
 // });
 
-
-// Hypermedia
-server.get({name: 'city', path: '/cities/:slug'},
-  function (req, res, next) {
-    res.send('city is ' + req.params.slug);
-    return next();
-  }
-);
-
-server.get('/anotherroute',
-    function (req, res, next) {
-        res.send({
-            country: 'Australia',
-            // render a URL by specifying the route name and parameters
-            capital: server.router.render('city', {slug: 'canberra'}, {details: true})
-        })
-    }
+// setup routes by methods
+routesByMethod.get.forEach(route =>
+  server.get(route.path, plugins.conditionalHandler(route.handlers))
 );
 
 //versioning
@@ -116,6 +108,17 @@ server.get('/cache/:id',
     return next();
   }
 );
+
+
+// dotenv
+server.get('/dotenv', 
+  function (req, res, next) {
+    const testConfig = process.env.CURRENT_API_VERSION || undefined;
+    res.send('CURRENT_API_VERSION=' + testConfig);
+    return next();
+  }
+);
+
 
 server.listen(8080, function() {
   console.log('%s listening at %s', server.name, server.url);
