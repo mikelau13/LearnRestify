@@ -5,7 +5,7 @@ npm install typescript
 npm install ts-node
 npm i @types/node
 
-npm start
+docker-compose up
 
 
 http://localhost:8080/foo?a=b

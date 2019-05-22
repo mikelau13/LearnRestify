@@ -1,0 +1,11 @@
+version: "3.1"
+services:
+  learn-restify:
+    image: learn-restify-server
+    container_name: LEARN_RESTIFY_DEBUG
+    restart: always
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
