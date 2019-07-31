@@ -69,9 +69,9 @@ server.get('/foo:a',
 // });
 
 // setup routes by methods
-routesByMethod.get.forEach(route =>
-  server.get(route.path, plugins.conditionalHandler(route.handlers))
-);
+// routesByMethod.get.forEach(route =>
+//   server.get(route.path, restify.plugins.conditionalHandler(route.handlers))
+// );
 
 //versioning
 server.get('/versioning/:name', restify.plugins.conditionalHandler([
